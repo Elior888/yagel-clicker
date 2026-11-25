@@ -1,0 +1,2758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>YAGEL CLICKER — Retro Pixel Sticker Idle</title>
+  <!-- Retro Pixel Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f111a;
+      --panel-bg: #181c2c;
+      --panel-border: #3a4466;
+      --panel-highlight: #5a6988;
+      --accent-gold: #ffd541;
+      --accent-gold-dark: #b86f18;
+      --accent-green: #38b764;
+      --accent-green-dark: #1e6f50;
+      --accent-blue: #41a6f6;
+      --accent-purple: #9b5de5;
+      --accent-red: #e43b44;
+      --text-main: #f4f4f4;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* Pixel Button Styling */
+    .px-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #262b44;
+      color: #ffffff;
+      border: 3px solid #000000;
+      box-shadow:
+        inset 3px 3px 0px #5a6988,
+        inset -3px -3px 0px #181425,
+        0 4px 0 #000000;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 10px;
+      cursor: pointer;
+      transition: transform 0.05s steps(2);
+      text-transform: uppercase;
+    }
+
+    .px-btn:hover:not(:disabled) {
+      background: #323959;
+      box-shadow:
+        inset 3px 3px 0px #7385ab,
+        inset -3px -3px 0px #1e1930,
+        0 4px 0 #000000;
+    }
+
+    .px-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow:
+        inset 2px 2px 0px #181425,
+        inset -2px -2px 0px #5a6988,
+        0 1px 0 #000000;
+    }
+
+    .px-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.6);
+    }
+
+    .px-btn-green {
+      background: #38b764;
+      box-shadow:
+        inset 3px 3px 0px #73ef9e,
+        inset -3px -3px 0px #1e6f50,
+        0 4px 0 #000000;
+    }
+    .px-btn-green:hover:not(:disabled) {
+      background: #44cc73;
+    }
+
+    .px-btn-gold {
+      background: #e89b15;
+      color: #1a1000;
+      box-shadow:
+        inset 3px 3px 0px #ffe875,
+        inset -3px -3px 0px #9e5608,
+        0 4px 0 #000000;
+    }
+    .px-btn-gold:hover:not(:disabled) {
+      background: #f5ab27;
+    }
+
+    .px-btn-purple {
+      background: #7b42bc;
+      box-shadow:
+        inset 3px 3px 0px #b785f2,
+        inset -3px -3px 0px #481d7a,
+        0 4px 0 #000000;
+    }
+
+    .px-btn-blue {
+      background: #2c7be5;
+      box-shadow:
+        inset 3px 3px 0px #7ab4ff,
+        inset -3px -3px 0px #16468a,
+        0 4px 0 #000000;
+    }
+
+    .px-btn-red {
+      background: #d63031;
+      box-shadow:
+        inset 3px 3px 0px #ff7675,
+        inset -3px -3px 0px #7a1414,
+        0 4px 0 #000000;
+    }
+
+    /* Pixel Box Panel */
+    .px-panel {
+      background: var(--panel-bg);
+      border: 4px solid #000000;
+      box-shadow:
+        inset 3px 3px 0px #3a4466,
+        inset -3px -3px 0px #0d101b;
+    }
+
+    /* Animated Background Canvas */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Floating FX Canvas */
+    #fxCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    /* Screens */
+    .screen {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* HOME SCREEN */
+    #homeScreen {
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(15, 17, 26, 0.45) 0%, rgba(10, 12, 20, 0.88) 100%);
+    }
+
+    .title-banner {
+      background: #181c2c;
+      border: 4px solid #000;
+      box-shadow:
+        inset 4px 4px 0 #5a6988,
+        inset -4px -4px 0 #0d101b,
+        0 8px 0 #000;
+      padding: 20px 24px;
+      max-width: 540px;
+      width: 100%;
+      margin-bottom: 18px;
+    }
+
+    .game-logo {
+      font-size: clamp(22px, 5vw, 36px);
+      color: var(--accent-gold);
+      text-shadow:
+        4px 4px 0px #000000,
+        -2px -2px 0px #b86f18;
+      margin: 0 0 10px 0;
+      letter-spacing: 2px;
+      animation: logoPulse 2s steps(4) infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .subtitle-tag {
+      display: inline-block;
+      background: #e43b44;
+      color: #fff;
+      padding: 4px 10px;
+      border: 2px solid #000;
+      font-size: 9px;
+      margin-bottom: 16px;
+    }
+
+    #homeStickerPreview {
+      width: 144px;
+      height: 180px;
+      margin: 0 auto 16px auto;
+      border: 4px solid #000;
+      box-shadow: 0 6px 0 #000;
+      animation: stickerFloat 1.6s steps(4) infinite;
+      background: #fff;
+    }
+
+    @keyframes stickerFloat {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+
+    .play-big-btn {
+      font-size: 18px !important;
+      padding: 16px 36px !important;
+      margin: 8px 0;
+    }
+
+    /* MAIN GAME SCREEN */
+    #gameScreen {
+      justify-content: space-between;
+    }
+
+    /* Top HUD */
+    .top-hud {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background: rgba(18, 22, 36, 0.94);
+      border-bottom: 4px solid #000;
+      box-shadow: inset 0 -3px 0 #3a4466;
+      z-index: 20;
+    }
+
+    .currency-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0d101b;
+      border: 3px solid #000;
+      box-shadow: inset 2px 2px 0 #262b44;
+      padding: 6px 12px;
+    }
+
+    .coin-icon-canvas {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .coin-amount {
+      font-size: clamp(13px, 3.2vw, 19px);
+      color: var(--accent-gold);
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .coin-label {
+      font-size: 8px;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .stats-strip {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: #0d101b;
+      border: 3px solid #000;
+      padding: 6px 10px;
+      font-size: 9px;
+    }
+
+    .stat-pill span {
+      color: #41a6f6;
+    }
+
+    /* Center Stage */
+    .center-stage {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .active-skin-badge {
+      background: rgba(13, 16, 27, 0.9);
+      border: 3px solid #000;
+      box-shadow: inset 2px 2px 0 #3a4466;
+      padding: 6px 12px;
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: 9px;
+      z-index: 15;
+    }
+
+    .rarity-common { color: #cbd5e1; }
+    .rarity-rare { color: #41a6f6; }
+    .rarity-epic { color: #c084fc; }
+    .rarity-legendary { color: #ffd541; }
+    .rarity-mythic { color: #ff4d6d; }
+    .rarity-transcendent { color: #38f2af; text-shadow: 0 0 6px rgba(56, 242, 175, 0.7); }
+
+    /* Clickable Yagel Sticker Wrapper */
+    .sticker-pedestal {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      z-index: 15;
+    }
+
+    #mainStickerCanvas {
+      width: clamp(192px, 34vh, 256px);
+      height: clamp(240px, 42.5vh, 320px);
+      border: 5px solid #000000;
+      box-shadow:
+        0 10px 0 #000000,
+        0 0 24px rgba(0, 0, 0, 0.75);
+      background: #ffffff;
+      transition: transform 0.04s steps(2);
+    }
+
+    .sticker-pedestal:hover #mainStickerCanvas {
+      box-shadow:
+        0 10px 0 #000000,
+        0 0 24px rgba(255, 213, 65, 0.45);
+    }
+
+    .sticker-squash {
+      transform: scale(0.91, 1.06) translateY(5px) !important;
+    }
+
+    /* Combo Bar */
+    .combo-wrapper {
+      margin-top: 14px;
+      width: 240px;
+      max-width: 85vw;
+      background: rgba(13, 16, 27, 0.92);
+      border: 3px solid #000;
+      padding: 6px 8px;
+      z-index: 15;
+    }
+
+    .combo-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8px;
+      margin-bottom: 4px;
+      color: #ffd541;
+    }
+
+    .combo-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #1e2235;
+      border: 2px solid #000;
+    }
+
+    .combo-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38b764, #ffd541, #e43b44);
+      transition: width 0.08s steps(4);
+    }
+
+    /* Golden Glitch Yagel Event Button */
+    #goldenYagelBtn {
+      position: absolute;
+      width: 64px;
+      height: 80px;
+      border: 3px solid #ffd541;
+      box-shadow: 0 0 16px #ffd541, 0 4px 0 #000;
+      cursor: pointer;
+      z-index: 22;
+      animation: goldenBounce 0.6s steps(2) infinite alternate;
+      background: #fff;
+      padding: 0;
+    }
+
+    @keyframes goldenBounce {
+      from { transform: scale(1) rotate(-6deg); }
+      to { transform: scale(1.12) rotate(6deg); }
+    }
+
+    /* Bottom Dock Navigation */
+    .bottom-dock {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 10px 12px 14px 12px;
+      background: rgba(18, 22, 36, 0.96);
+      border-top: 4px solid #000;
+      box-shadow: inset 0 3px 0 #3a4466;
+      z-index: 20;
+    }
+
+    .dock-btn {
+      flex-direction: column;
+      padding: 10px 4px;
+      font-size: 9px;
+      text-align: center;
+    }
+
+    .dock-btn .dock-icon {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* Modal / Drawer Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 13, 0.82);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .modal-window {
+      width: 100%;
+      max-width: 780px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      background: #181c2c;
+      border: 4px solid #000;
+      box-shadow:
+        inset 4px 4px 0 #4a567d,
+        inset -4px -4px 0 #0c0e17,
+        0 10px 0 #000;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #10131f;
+      border-bottom: 4px solid #000;
+    }
+
+    .modal-title {
+      font-size: 13px;
+      color: var(--accent-gold);
+      margin: 0;
+    }
+
+    .modal-subbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #141826;
+      border-bottom: 3px solid #000;
+      font-size: 9px;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Custom Pixel Scrollbar */
+    .modal-body::-webkit-scrollbar {
+      width: 12px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+      background: #0d101b;
+      border-left: 2px solid #000;
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+      background: #4a567d;
+      border: 2px solid #000;
+    }
+
+    /* Upgrade Cards */
+    .upgrade-card {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #21263b;
+      border: 3px solid #000;
+      box-shadow: inset 2px 2px 0 #384163;
+      padding: 10px 12px;
+    }
+
+    .upgrade-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .upgrade-name {
+      font-size: 11px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .upgrade-lvl {
+      display: inline-block;
+      background: #0d101b;
+      color: #38b764;
+      border: 2px solid #000;
+      padding: 2px 6px;
+      font-size: 8px;
+      margin-left: 6px;
+    }
+
+    .upgrade-desc {
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .upgrade-effect {
+      font-size: 9px;
+      color: #41a6f6;
+    }
+
+    /* Skin Grid */
+    .skin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+      gap: 10px;
+    }
+
+    .skin-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: #21263b;
+      border: 3px solid #000;
+      box-shadow: inset 2px 2px 0 #384163;
+      padding: 10px 8px;
+      gap: 6px;
+    }
+
+    .skin-card.equipped {
+      border-color: #38b764;
+      background: #1d2e2b;
+      box-shadow: inset 2px 2px 0 #44cc73;
+    }
+
+    .skin-thumb {
+      width: 96px;
+      height: 120px;
+      border: 3px solid #000;
+      background: #fff;
+    }
+
+    .skin-title {
+      font-size: 9px;
+      color: #fff;
+      min-height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Background Grid */
+    .bg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px;
+    }
+
+    .bg-card {
+      display: flex;
+      flex-direction: column;
+      background: #21263b;
+      border: 3px solid #000;
+      box-shadow: inset 2px 2px 0 #384163;
+      padding: 10px;
+      gap: 8px;
+    }
+
+    .bg-card.equipped {
+      border-color: #ffd541;
+      background: #2b271c;
+    }
+
+    .bg-preview-canvas {
+      width: 100%;
+      height: 90px;
+      border: 3px solid #000;
+      background: #000;
+    }
+
+    /* Toast Message Box (No alert() used!) */
+    #toastBox {
+      position: fixed;
+      top: 74px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10131f;
+      color: #ffd541;
+      border: 3px solid #000;
+      box-shadow: inset 2px 2px 0 #5a6988, 0 6px 0 #000;
+      padding: 10px 16px;
+      font-size: 10px;
+      z-index: 100;
+      pointer-events: none;
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    /* Save Modal Textarea */
+    .save-textarea {
+      width: 100%;
+      height: 90px;
+      background: #0d101b;
+      color: #38b764;
+      border: 3px solid #000;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 8px;
+      resize: none;
+    }
+
+    @media (max-width: 520px) {
+      .dock-btn {
+        font-size: 8px;
+        padding: 8px 2px;
+      }
+      .top-hud {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated Pixel Background Layer -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Floating Particles & Numbers FX Layer -->
+  <canvas id="fxCanvas"></canvas>
+
+  <!-- Custom Non-Blocking Toast Notification -->
+  <div id="toastBox" class="hidden"></div>
+
+  <!-- ==================== HOME SCREEN ==================== -->
+  <section id="homeScreen" class="screen">
+    <div class="title-banner">
+      <div class="subtitle-tag">16-BIT MEME EDITION</div>
+      <h1 class="game-logo">YAGEL CLICKER</h1>
+      <canvas id="homeStickerPreview" width="64" height="80"></canvas>
+      <p style="font-size: 9px; color: #cbd5e1; margin: 0 0 14px 0;">
+        CLICK THE LOW-RES LEGEND. COLLECT ALL 30 EMOJI STICKERS. ASCEND TO OMNIVERSE WEALTH.
+      </p>
+
+      <div id="homeSaveSummary" class="px-panel" style="padding: 10px; margin-bottom: 14px; font-size: 9px; background: #10131f;">
+        NEW SAVE READY — START YOUR STICKER EMPIRE!
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+        <button id="playGameBtn" class="px-btn px-btn-green play-big-btn">
+          ▶ PLAY GAME
+        </button>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px;">
+        <button id="homeSoundBtn" class="px-btn">🔊 SFX: ON</button>
+        <button id="homeSaveMgrBtn" class="px-btn px-btn-blue">💾 SAVE / LOAD</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN GAME SCREEN ==================== -->
+  <section id="gameScreen" class="screen hidden">
+    <!-- Top HUD -->
+    <header class="top-hud">
+      <div class="currency-box">
+        <canvas id="hudCoinIcon" class="coin-icon-canvas" width="16" height="16"></canvas>
+        <div>
+          <div id="hudCoins" class="coin-amount">0</div>
+          <span class="coin-label">YAGELCOINS</span>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-pill">YPC: <span id="hudYpc">1</span></div>
+        <div class="stat-pill">YPS: <span id="hudYps">0</span></div>
+        <div class="stat-pill">BONUS: <span id="hudSkinBonus">+0%</span></div>
+      </div>
+
+      <div style="display: flex; gap: 6px;">
+        <button id="gameSoundBtn" class="px-btn" style="padding: 8px 10px;">🔊</button>
+        <button id="gameSaveBtn" class="px-btn px-btn-blue" style="padding: 8px 10px;">💾</button>
+        <button id="goHomeBtn" class="px-btn px-btn-red" style="padding: 8px 10px;">HOME</button>
+      </div>
+    </header>
+
+    <!-- Center Click Stage -->
+    <main class="center-stage" id="centerStage">
+      <div class="active-skin-badge">
+        <div id="activeSkinTitle" style="color: #fff; margin-bottom: 3px;">#01 CLASSIC LIKE YAGEL</div>
+        <div id="activeSkinRarity" class="rarity-common">COMMON • +0% GLOBAL</div>
+      </div>
+
+      <div id="stickerPedestal" class="sticker-pedestal" title="Click Yagel!">
+        <canvas id="mainStickerCanvas" width="64" height="80"></canvas>
+      </div>
+
+      <div class="combo-wrapper">
+        <div class="combo-header">
+          <span>CLICK HYPE COMBO</span>
+          <span id="comboMultiplierText">x1.0</span>
+        </div>
+        <div class="combo-bar-bg">
+          <div id="comboBarFill" class="combo-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Golden Bonus Yagel Popup -->
+      <button id="goldenYagelBtn" class="hidden" title="GOLDEN GLITCH YAGEL! CLICK FAST!">
+        <canvas id="goldenYagelCanvas" width="64" height="80" style="width:100%;height:100%;"></canvas>
+      </button>
+    </main>
+
+    <!-- Bottom Navigation Dock -->
+    <nav class="bottom-dock">
+      <button id="openUpgradesBtn" class="px-btn px-btn-green dock-btn">
+        <span class="dock-icon">⚡</span>
+        <span>UPGRADES</span>
+      </button>
+      <button id="openSkinShopBtn" class="px-btn px-btn-gold dock-btn">
+        <span class="dock-icon">🛒</span>
+        <span>SKIN SHOP</span>
+      </button>
+      <button id="openWardrobeBtn" class="px-btn px-btn-purple dock-btn">
+        <span class="dock-icon">🎭</span>
+        <span>MY SKINS</span>
+      </button>
+      <button id="openBgShopBtn" class="px-btn px-btn-blue dock-btn">
+        <span class="dock-icon">🖼️</span>
+        <span>BACKGROUNDS</span>
+      </button>
+    </nav>
+  </section>
+
+  <!-- ==================== MODAL DRAWER ==================== -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 id="modalTitle" class="modal-title">SHOP</h2>
+        <button id="closeModalBtn" class="px-btn px-btn-red" style="padding: 6px 10px;">✕</button>
+      </div>
+      <div id="modalSubbar" class="modal-subbar">
+        <span id="modalBalanceText">YAGELCOINS: 0</span>
+        <div id="modalExtraControls"></div>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * YAGEL CLICKER — COMPLETE RETRO PIXEL ART IDLE CLICKER ENGINE
+     * ============================================================================
+     * Features:
+     * 1. Faithful 32x40 pixel-art rendering of the uploaded low-res Yagel portrait
+     *    composited with 30 distinct custom 16x16 pixel-art corner emojis.
+     * 2. Deep exponential economy engineered for months of long-term progression
+     *    (reaching Decillions, Duodecillions, and beyond).
+     * 3. 18 multi-tiered Upgrades (Click Power & Passive YPS Generators) with 25-level
+     *    milestone doublers and buy-amount toggles (1x / 10x / 25x / MAX).
+     * 4. 30 Sticker Skins Shop + Separate Wardrobe/Equip Menu + 12 Animated Pixel
+     *    Backgrounds Shop.
+     * 5. 8-bit Web Audio API procedural sound effects, offline idle progress,
+     *    and Export/Import Base64 save strings.
+     */
+
+    // ============================================================================
+    // 1. BIG NUMBER FORMATTER (Supports up to 10^100+ & Scientific Notation)
+    // ============================================================================
+    const NUMBER_SUFFIXES = [
+      "", "K", "M", "B", "T",
+      "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc",
+      "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg",
+      "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg", "Tg"
+    ];
+
+    function formatNumber(num) {
+      if (!isFinite(num)) return "INFINITY";
+      if (num < 0) return "-" + formatNumber(-num);
+      if (num < 1000) {
+        return num % 1 === 0 ? num.toString() : num.toFixed(1).replace(/\.0$/, "");
+      }
+      const tier = Math.floor(Math.log10(num) / 3);
+      if (tier < NUMBER_SUFFIXES.length) {
+        const scale = Math.pow(10, tier * 3);
+        const scaled = num / scale;
+        const decimals = scaled >= 100 ? 1 : scaled >= 10 ? 2 : 2;
+        return scaled.toFixed(decimals).replace(/\.00$/, "") + " " + NUMBER_SUFFIXES[tier];
+      }
+      return num.toExponential(2).replace("+", "");
+    }
+
+    // ============================================================================
+    // 2. RETRO 8-BIT WEB AUDIO SYNTHESIZER (Zero External Audio Files)
+    // ============================================================================
+    class PixelAudio {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, vol = 0.12, slideTo = null) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (slideTo) {
+            osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+          }
+          gain.gain.setValueAtTime(vol, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (e) {
+          // Ignore audio context autoplay errors
+        }
+      }
+
+      click(combo = 1) {
+        const base = 320 + Math.min(combo * 28, 380);
+        this.playTone(base, "square", 0.065, 0.1, base * 1.35);
+      }
+
+      buy() {
+        this.playTone(440, "square", 0.07, 0.12);
+        setTimeout(() => this.playTone(660, "square", 0.09, 0.12), 65);
+        setTimeout(() => this.playTone(880, "square", 0.13, 0.14), 130);
+      }
+
+      equip() {
+        this.playTone(520, "triangle", 0.07, 0.14, 780);
+      }
+
+      golden() {
+        const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+        notes.forEach((n, idx) => {
+          setTimeout(() => this.playTone(n, "square", 0.11, 0.13), idx * 55);
+        });
+      }
+
+      error() {
+        this.playTone(150, "sawtooth", 0.14, 0.11, 95);
+      }
+    }
+
+    const sfx = new PixelAudio();
+
+    // ============================================================================
+    // 3. PIXEL ART PORTRAIT & 30 CUSTOM CORNER EMOJI GENERATOR
+    // ============================================================================
+    /**
+     * Uses the user's exact custom pixel-art portrait (`low_res_yagel_pic_pixel_art.png`)
+     * cleanly without any filters, color tints, or re-pixelation, composited with
+     * the 30 custom 16x16 pixel-art corner emojis in the bottom-right corner.
+     */
+    const BASE_YAGEL_IMG_SRC = "low_res_yagel_pic_pixel_art.png";
+    const baseYagelImg = new Image();
+    let isBaseYagelLoaded = false;
+
+    baseYagelImg.onload = function () {
+      isBaseYagelLoaded = true;
+      // Clear cache so all canvases immediately render with the loaded portrait
+      for (const key in stickerCanvasCache) {
+        delete stickerCanvasCache[key];
+      }
+      if (typeof updateHomePreview === "function") updateHomePreview();
+      const mainCanvas = document.getElementById("mainStickerCanvas");
+      if (mainCanvas && typeof state !== "undefined") {
+        drawStickerOnto(mainCanvas, state.equippedSkin);
+      }
+      if (typeof currentModalTab !== "undefined" && (currentModalTab === "skinShop" || currentModalTab === "wardrobe")) {
+        openModal(currentModalTab);
+      }
+    };
+    baseYagelImg.src = BASE_YAGEL_IMG_SRC;
+
+    /**
+     * 30 Distinct 16x16 Pixel-Art Corner Emojis
+     * Designed so every single sticker in the 30-skin pack has a completely
+     * unmistakable silhouette, theme, and color scheme (no lookalike faces!).
+     */
+    const EMOJI_PAL = {
+      '.': null,
+      '0': '#000000', // Outline
+      'Y': '#ffd541', // Bright Yellow
+      'O': '#f59e0b', // Orange / Gold shade
+      'B': '#b45309', // Brown / Bronze
+      'R': '#ef4444', // Red
+      'r': '#991b1b', // Dark Red
+      'W': '#ffffff', // White
+      'G': '#22c55e', // Green
+      'g': '#15803d', // Dark Green
+      'C': '#38bdf8', // Cyan / Light Blue
+      'U': '#2563eb', // Royal Blue
+      'P': '#a855f7', // Purple
+      'p': '#6b21a8', // Dark Purple
+      'K': '#f472b6', // Pink
+      'S': '#94a3b8', // Silver / Grey
+      's': '#475569', // Dark Slate
+      'T': '#fde68a'  // Cream / Highlight
+    };
+
+    const EMOJI_ART = {
+      // 1. Classic Thumbs Up (Starter - matches yagel_like.png)
+      like: [
+        "......000.......",
+        ".....0YYY0......",
+        ".....0YYY0......",
+        ".....0YYY0......",
+        "....0YYYY0000...",
+        "..00YYYYYYYYY0..",
+        ".0UU0YYYYYYYYO0.",
+        ".0UU0YYYYYYYYY0.",
+        ".0UU0YYYYYYYYO0.",
+        ".0UU0YYYYYYYYY0.",
+        ".0UU0YYYYYYYYO0.",
+        ".0UU0YYYYYYYYY0.",
+        "..00YYYYYYYYO0..",
+        "....000000000...",
+        "................",
+        "................"
+      ],
+      // 2. Thumbs Down
+      dislike: [
+        "................",
+        "....000000000...",
+        "..00YYYYYYYYO0..",
+        ".0UU0YYYYYYYYY0.",
+        ".0UU0YYYYYYYYO0.",
+        ".0UU0YYYYYYYYY0.",
+        ".0UU0YYYYYYYYO0.",
+        ".0UU0YYYYYYYYY0.",
+        ".0UU0YYYYYYYYO0.",
+        "..00YYYYYYYYY0..",
+        "....0YYYY0000...",
+        ".....0YYY0......",
+        ".....0YYY0......",
+        ".....0YYY0......",
+        "......000.......",
+        "................"
+      ],
+      // 3. Fire Flame
+      fire: [
+        ".......00.......",
+        "......0RR0......",
+        ".....0RRRR0.....",
+        "....0RRORRR0....",
+        "...0RROOORRR0...",
+        "..0RROOOORRRR0..",
+        "..0ROOYYOORRR0..",
+        ".0RROYYYYOORRR0.",
+        ".0ROOYYYYYOORR0.",
+        ".0ROYYYYYYOORR0.",
+        ".0ROYYYYYYOORR0.",
+        "..0ROYYYYOORR0..",
+        "..0RROOOORRRR0..",
+        "...0RRRRRRRR0...",
+        "....00000000....",
+        "................"
+      ],
+      // 4. Cool Sunglasses Face
+      cool: [
+        "....00000000....",
+        "..00YYYYYYYY00..",
+        ".0YYYYYYYYYYYY0.",
+        ".0YYYYYYYYYYYY0.",
+        "0000000000000000",
+        "00C0000000C00000",
+        "000C0000000C0000",
+        ".000000..000000.",
+        "0YYYYYYYYYYYYYY0",
+        "0YYYYYYYYYYYYYY0",
+        ".0YY0YYYYYY0YY0.",
+        ".0YYY000000YYY0.",
+        "..00YYYYYYYY00..",
+        "....00000000....",
+        "................",
+        "................"
+      ],
+      // 5. Skull
+      skull: [
+        "....00000000....",
+        "..00WWWWWWWW00..",
+        ".0WWWWWWWWWWWW0.",
+        ".0WWWWWWWWWWWW0.",
+        "0WWWWWWWWWWWWWW0",
+        "0WW000WWWW000WW0",
+        "0WW000WWWW000WW0",
+        "0WW000WWWW000WW0",
+        ".0WWWW0000WWWW0.",
+        ".0WWWW0000WWWW0.",
+        "..00WWWWWWWW00..",
+        "...0W0W0W0W0W0..",
+        "...0W0W0W0W0W0..",
+        "....000000000...",
+        "................",
+        "................"
+      ],
+      // 6. Clown Face
+      clown: [
+        ".000........000.",
+        "0RRR00000000RRR0",
+        "0RR0WWWWWWWW0RR0",
+        ".00WW00WW00WW00.",
+        "..0WW00WW00WW0..",
+        "..0WWWW00WWWW0..",
+        "..0WWW0RR0WWW0..",
+        "..0WWW0RR0WWW0..",
+        "..0WW000000WW0..",
+        "..0W0RRRRRR0W0..",
+        "...00RRRRRR00...",
+        "....00000000....",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 7. Pixel Heart
+      heart: [
+        "................",
+        "..0000....0000..",
+        ".0RRRR0..0RRRR0.",
+        "0RRWWRR00RRRRRR0",
+        "0RRWRRRRRRRRRRR0",
+        "0RRRRRRRRRRRRRR0",
+        "0RRRRRRRRRRRRRR0",
+        ".0RRRRRRRRRRRR0.",
+        "..0RRRRRRRRRR0..",
+        "...0RRRRRRRR0...",
+        "....0RRRRRR0....",
+        ".....0RRRR0.....",
+        "......0RR0......",
+        ".......00.......",
+        "................",
+        "................"
+      ],
+      // 8. 100 Badge
+      hundred: [
+        "................",
+        ".00..0000..0000.",
+        "0R0.0R00R00R00R0",
+        ".00.0R00R00R00R0",
+        ".00.0R00R00R00R0",
+        ".00..0000..0000.",
+        "................",
+        ".00000000000000.",
+        "0RRRRRRRRRRRRRR0",
+        ".00000000000000.",
+        "..000000000000..",
+        ".0RRRRRRRRRRRR0.",
+        "..000000000000..",
+        "................",
+        "................",
+        "................"
+      ],
+      // 9. Poop Swirl
+      poop: [
+        ".......00.......",
+        "......0BB0......",
+        ".....0BBBB0.....",
+        "....0BBBBBB0....",
+        "...0000000000...",
+        "..0BBBBBBBBBB0..",
+        "..0BBWBBBBWBB0..",
+        "..0BB0BBBB0BB0..",
+        ".00000000000000.",
+        "0BBBBBBBBBBBBBB0",
+        "0BBBB000000BBBB0",
+        "0BBBBBBBBBBBBBB0",
+        ".00000000000000.",
+        "................",
+        "................",
+        "................"
+      ],
+      // 10. Green Alien
+      alien: [
+        "...0000000000...",
+        "..0GGGGGGGGGG0..",
+        ".0GGGGGGGGGGGG0.",
+        ".0GGGGGGGGGGGG0.",
+        ".0G000GGGG000G0.",
+        ".000W00GG00W000.",
+        ".000000GG000000.",
+        "..0000GGGG0000..",
+        "..0GGGGGGGGGG0..",
+        "...0GGGGGGGG0...",
+        "....0GG00GG0....",
+        ".....0GGGG0.....",
+        "......0000......",
+        "................",
+        "................",
+        "................"
+      ],
+      // 11. Royal Crown
+      crown: [
+        "................",
+        ".00....00....00.",
+        "0YY0..0YY0..0YY0",
+        "0YYY00YYYY00YYY0",
+        "0YYYYYYYYYYYYYY0",
+        "0YYRYYYYCYYYYRY0",
+        "0YYYYYYYYYYYYYY0",
+        "0OOOOOOOOOOOOOO0",
+        "0YYGYYYYPYYYYGY0",
+        "0OOOOOOOOOOOOOO0",
+        ".00000000000000.",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 12. Money Bag
+      money: [
+        ".....000000.....",
+        "....0TTTTTT0....",
+        ".....00RR00.....",
+        "....0TTTTTT0....",
+        "...0TTTTTTTT0...",
+        "..0TTTTGGTTTT0..",
+        ".0TTTTGTT0TTTT0.",
+        ".0TTTTTGGTTTTT0.",
+        ".0TTTT0TTGTTTT0.",
+        ".0TTTTTGGTTTTT0.",
+        "..0TTTTTTTTTT0..",
+        "...0000000000...",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 13. Purple Devil
+      devil: [
+        ".00..........00.",
+        "0PP0.000000.0PP0",
+        "0PPP0PPPPPP0PPP0",
+        ".0PPPPPPPPPPPP0.",
+        "0PPP00PPPP00PPP0",
+        "0PP0YY0PP0YY0PP0",
+        "0PPPPPPPPPPPPPP0",
+        "0PPPPPPPPPPPPPP0",
+        ".0PP00000000PP0.",
+        ".0PPP0W00W0PPP0.",
+        "..00PPPPPPPP00..",
+        "....00000000....",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 14. Retro Robot
+      robot: [
+        ".......00.......",
+        "......0RR0......",
+        ".......00.......",
+        "..000000000000..",
+        ".0SSSSSSSSSSSS0.",
+        "0SS0SSSSSSSS0SS0",
+        "0SS0CC0SS0CC0SS0",
+        "0SS0CC0SS0CC0SS0",
+        "0SSSSSSSSSSSSSS0",
+        "0SS0000000000SS0",
+        "0SS0Y0Y0Y0Y0YSS0",
+        ".0SSSSSSSSSSSS0.",
+        "..000000000000..",
+        "................",
+        "................",
+        "................"
+      ],
+      // 15. Spooky Ghost
+      ghost: [
+        "....00000000....",
+        "..00WWWWWWWW00..",
+        ".0WWWWWWWWWWWW0.",
+        ".0WWW00WW00WWW0.",
+        "0WWWW00WW00WWWW0",
+        "0WWWWWWWWWWWWWW0",
+        "0WWWWW0000WWWWW0",
+        "0WWWWW0000WWWWW0",
+        "0WWWWWWWWWWWWWW0",
+        "0WWWWWWWWWWWWWW0",
+        "0WW00WWWWWW00WW0",
+        "0W0..0WWWW0..0W0",
+        ".0....0000....0.",
+        "................",
+        "................",
+        "................"
+      ],
+      // 16. Lightning Bolt
+      bolt: [
+        "......000000....",
+        ".....0YYYYY0....",
+        "....0YYYYY0.....",
+        "...0YYYYY0......",
+        "..0YYYYYYYYY0...",
+        ".0YYYYYYYYY0....",
+        "0YYYYYYYYY0.....",
+        ".00000YYY0......",
+        "....0YYY0.......",
+        "...0YYY0........",
+        "..0YYY0.........",
+        ".0YYY0..........",
+        ".0000...........",
+        "................",
+        "................",
+        "................"
+      ],
+      // 17. Cartoon Bomb
+      bomb: [
+        "..........000...",
+        ".........0YRY0..",
+        "........00000...",
+        ".......00.......",
+        ".....000000.....",
+        "...00ssssss00...",
+        "..0ssWWssssss0..",
+        ".0ssWWssssssss0.",
+        ".0ssssssssssss0.",
+        ".0ssssssssssss0.",
+        ".0ssssssssssss0.",
+        "..0ssssssssss0..",
+        "...00ssssss00...",
+        ".....000000.....",
+        "................",
+        "................"
+      ],
+      // 18. Pepperoni Pizza
+      pizza: [
+        ".......00.......",
+        "......0OO0......",
+        ".....0OYYO0.....",
+        "....0OYYYYO0....",
+        "....0OYYRRO0....",
+        "...0OYYYYYYO0...",
+        "...0ORROYYYO0...",
+        "..0OYYYYYYYYO0..",
+        "..0OYYYYRROYO0..",
+        ".0OYYYYYYYYYYO0.",
+        ".0BBBBBBBBBBBB0.",
+        "0BBBBBBBBBBBBBB0",
+        ".00000000000000.",
+        "................",
+        "................",
+        "................"
+      ],
+      // 19. Desert Cactus
+      cactus: [
+        "......0000......",
+        ".....0GGGG0.....",
+        "..00.0GggG0.00..",
+        ".0GG00GGGG00GG0.",
+        ".0GG00GggG00GG0.",
+        ".0GGGGGGGGGGGG0.",
+        "..0000GGGG0000..",
+        ".....0GggG0.....",
+        ".....0GGGG0.....",
+        "...0000000000...",
+        "...0BBBBBBBB0...",
+        "....0BBBBBB0....",
+        "....00000000....",
+        "................",
+        "................",
+        "................"
+      ],
+      // 20. Wide Eyes
+      eyes: [
+        "................",
+        ".00000....00000.",
+        "0WWWWW0..0WWWWW0",
+        "0W00WW0..0W00WW0",
+        "0W00WW0..0W00WW0",
+        "0W00WW0..0W00WW0",
+        "0WWWWW0..0WWWWW0",
+        ".00000....00000.",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 21. Big Brain
+      brain: [
+        "....00000000....",
+        "..00KKKKKKKK00..",
+        ".0KK00KKKK00KK0.",
+        "0KKKKKK00KKKKKK0",
+        "0KK00KK00KK00KK0",
+        "0KKKKKK00KKKKKK0",
+        "0KK00KK00KK00KK0",
+        ".0KKKKK00KKKKK0.",
+        "..00KKKKKKKK00..",
+        "....00000000....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 22. Space Rocket
+      rocket: [
+        ".......00.......",
+        "......0RR0......",
+        ".....0RRRR0.....",
+        "....0WWWWWW0....",
+        "....0WWCCWW0....",
+        "....0WWCCWW0....",
+        "...0RWWWWWW0R...",
+        "..0RRWWWWWW0RR..",
+        "..0R0WWWWWW00R..",
+        "....00000000....",
+        ".....0OYYO0.....",
+        "......0RR0......",
+        ".......00.......",
+        "................",
+        "................",
+        "................"
+      ],
+      // 23. Cyan Diamond
+      diamond: [
+        "................",
+        "...0000000000...",
+        "..0CCWWWWCCCC0..",
+        ".0CCWCCCCCCCCG0.",
+        "0CCCCCCCCCCCCCC0",
+        ".0CCCCCCCCCCCC0.",
+        "..0CCCCCCCCCC0..",
+        "...0CCCCCCCC0...",
+        "....0CCCCCC0....",
+        ".....0CCCC0.....",
+        "......0CC0......",
+        ".......00.......",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 24. Emerald Dragon
+      dragon: [
+        "...00......00...",
+        "..0YY0.00.0YY0..",
+        "...000GGGG000...",
+        "..0GGGGGGGGGG0..",
+        ".0GG00GGGG00GG0.",
+        ".0GGRRGGGGRRGG0.",
+        "0GGGGGGGGGGGGGG0",
+        "0GG00GGGGGG00GG0",
+        ".0GGGGGGGGGGGG0.",
+        "..00G0W00W0G00..",
+        "...0R000000R0...",
+        "....0RRRRRR0....",
+        ".....000000.....",
+        "................",
+        "................",
+        "................"
+      ],
+      // 25. Flying UFO
+      ufo: [
+        ".....000000.....",
+        "....0CCCCCC0....",
+        "...0CCCCCCCC0...",
+        "..000000000000..",
+        ".0SSSSSSSSSSSS0.",
+        "0SSYSSYSSYSSYSS0",
+        ".0SSSSSSSSSSSS0.",
+        "..000000000000..",
+        "....0G0..0G0....",
+        "...0G0....0G0...",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 26. Radioactive Hazard
+      radioactive: [
+        "....00000000....",
+        "..00YYYYYYYY00..",
+        ".0YY000YY000YY0.",
+        "0YY0000YY0000YY0",
+        "0YYY000YY000YYY0",
+        "0YYYYYY00YYYYYY0",
+        "0YYYYYY00YYYYYY0",
+        "0YYYYY0000YYYYY0",
+        ".0YYYY0000YYYY0.",
+        "..00YYYYYYYY00..",
+        "....00000000....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 27. Cosmic Vortex
+      vortex: [
+        "....00000000....",
+        "..00PPPPPPPP00..",
+        ".0PP00000000PP0.",
+        "0PP0CCCCCCCC0PP0",
+        "0P0CC000000CC0P0",
+        "0P0C0WWWWWW0C0P0",
+        "0P0C0W0000W0C0P0",
+        "0P0CC000000CC0P0",
+        "0PP0CCCCCCCC0PP0",
+        ".0PP00000000PP0.",
+        "..00PPPPPPPP00..",
+        "....00000000....",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 28. Golden Champion Trophy
+      trophy: [
+        "..000000000000..",
+        ".00YYYYYYYYYY00.",
+        "0Y0YYYYWYYYYY0Y0",
+        "0Y0YYYYWYYYYY0Y0",
+        ".00YYYYYYYYYY00.",
+        "...0YYYYYYYY0...",
+        "....0YYYYYY0....",
+        ".....0OOOO0.....",
+        "......0OO0......",
+        ".....0OOOO0.....",
+        "...00BBBBBB00...",
+        "..0BBBBBBBBBB0..",
+        "..000000000000..",
+        "................",
+        "................",
+        "................"
+      ],
+      // 29. Infinity Cosmic Orb
+      infinity: [
+        "................",
+        "................",
+        "..0000....0000..",
+        ".0CCCC0..0PPPP0.",
+        "0CC00CC00PP00PP0",
+        "0C0..0C00P0..0P0",
+        "0CC00CC00PP00PP0",
+        ".0CCCC0..0PPPP0.",
+        "..0000....0000..",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      // 30. Ascended God Eye (Final Endgame Skin)
+      god: [
+        ".......00.......",
+        "......0YY0......",
+        "....00000000....",
+        "..00WWWWWWWW00..",
+        ".0WWWWCCCCWWWW0.",
+        "0WWWWCC00CCWWWW0",
+        "0WWWWCC00CCWWWW0",
+        ".0WWWWCCCCWWWW0.",
+        "..00WWWWWWWW00..",
+        "....00000000....",
+        "......0YY0......",
+        ".......00.......",
+        "................",
+        "................",
+        "................",
+        "................"
+      ]
+    };
+
+    // Cache rendered sticker offscreen canvases for 60fps zero-lag rendering
+    const stickerCanvasCache = {};
+
+    function renderStickerToOffscreen(emojiKey) {
+      if (isBaseYagelLoaded && stickerCanvasCache[emojiKey]) {
+        return stickerCanvasCache[emojiKey];
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 192;
+      canvas.height = 240;
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+
+      // 1. Draw the exact uploaded pixel-art Yagel portrait cleanly without filters or re-pixelation
+      if (isBaseYagelLoaded && baseYagelImg.naturalWidth > 0) {
+        ctx.drawImage(baseYagelImg, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = "#ebe6e3";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // 2. Draw the 16x16 corner emoji in the bottom-right corner (6x scale = 96x96 on 192x240)
+      // Matches the exact position and scale of the thumbs-up in `yagel_like.png`!
+      const art = EMOJI_ART[emojiKey] || EMOJI_ART.like;
+      const scale = 6;
+      const offsetX = 90;
+      const offsetY = 138;
+
+      for (let ey = 0; ey < 16; ey++) {
+        const eRow = art[ey];
+        for (let ex = 0; ex < 16; ex++) {
+          const ech = eRow[ex];
+          const eColor = EMOJI_PAL[ech];
+          if (eColor) {
+            ctx.fillStyle = eColor;
+            ctx.fillRect(offsetX + ex * scale, offsetY + ey * scale, scale, scale);
+          }
+        }
+      }
+
+      if (isBaseYagelLoaded) {
+        stickerCanvasCache[emojiKey] = canvas;
+      }
+      return canvas;
+    }
+
+    function drawStickerOnto(targetCanvas, emojiKey) {
+      if (!targetCanvas) return;
+      targetCanvas.width = 192;
+      targetCanvas.height = 240;
+      const src = renderStickerToOffscreen(emojiKey);
+      const ctx = targetCanvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+      ctx.drawImage(src, 0, 0, targetCanvas.width, targetCanvas.height);
+    }
+
+    // Draw custom pixel YagelCoin icon on top HUD
+    function drawCoinIcon() {
+      const c = document.getElementById("hudCoinIcon");
+      if (!c) return;
+      const ctx = c.getContext("2d");
+      const coinGrid = [
+        ".....000000.....",
+        "...00YYYYYY00...",
+        "..0YYYYOOYYYY0..",
+        ".0YYYOOYYOOYYY0.",
+        ".0YYOY0YY0YOYY0.",
+        "0YYYOY0YY0YOYYY0",
+        "0YYYOY0YY0YOYYY0",
+        "0YYYYOOYYOOYYYY0",
+        "0YYYYYYOOYYYYYY0",
+        "0YYYYYYOOYYYYYY0",
+        ".0YYYYYOOYYYYY0.",
+        ".0YYYYYOOYYYYY0.",
+        "..0YYYYOOYYYY0..",
+        "...00YYYYYY00...",
+        ".....000000.....",
+        "................"
+      ];
+      for (let y = 0; y < 16; y++) {
+        for (let x = 0; x < 16; x++) {
+          const col = EMOJI_PAL[coinGrid[y][x]];
+          if (col) {
+            ctx.fillStyle = col;
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+    }
+
+    // ============================================================================
+    // 4. GAME CONTENT DEFINITIONS (30 SKINS, 18 UPGRADES, 12 BACKGROUNDS)
+    // ============================================================================
+
+    /**
+     * 30 Sticker Skins — Every single one uses the exact same pixel-art Yagel
+     * portrait + a unique corner emoji. Prices scale from FREE up to 150 Decillion
+     * so collecting all 30 is a true multi-month achievement!
+     */
+    const SKINS_DATA = [
+      { id: "like",        num: "01", name: "CLASSIC LIKE YAGEL",      rarity: "COMMON",       bonus: 0.00, price: 0 },
+      { id: "dislike",     num: "02", name: "DISLIKE YAGEL",           rarity: "COMMON",       bonus: 0.02, price: 150 },
+      { id: "fire",        num: "03", name: "LIT FIRE YAGEL",          rarity: "COMMON",       bonus: 0.05, price: 2500 },
+      { id: "cool",        num: "04", name: "COOL SHADES YAGEL",       rarity: "COMMON",       bonus: 0.08, price: 25000 },
+      { id: "skull",       num: "05", name: "BRUH SKULL YAGEL",        rarity: "RARE",         bonus: 0.12, price: 220000 },
+      { id: "clown",       num: "06", name: "CLOWN MOMENT YAGEL",      rarity: "RARE",         bonus: 0.16, price: 1800000 },
+      { id: "heart",       num: "07", name: "WHOLESOME HEART YAGEL",   rarity: "RARE",         bonus: 0.22, price: 15000000 },
+      { id: "hundred",     num: "08", name: "KEEP IT 100 YAGEL",       rarity: "RARE",         bonus: 0.28, price: 120000000 },
+      { id: "poop",        num: "09", name: "CURSED POOP YAGEL",       rarity: "RARE",         bonus: 0.35, price: 950000000 },
+      { id: "alien",       num: "10", name: "AREA 51 ALIEN YAGEL",     rarity: "EPIC",         bonus: 0.45, price: 8e9 },
+      { id: "crown",       num: "11", name: "KING CROWN YAGEL",        rarity: "EPIC",         bonus: 0.55, price: 7.5e10 },
+      { id: "money",       num: "12", name: "BAG CHASER YAGEL",        rarity: "EPIC",         bonus: 0.68, price: 6.5e11 },
+      { id: "devil",       num: "13", name: "MENACE DEVIL YAGEL",      rarity: "EPIC",         bonus: 0.82, price: 5.5e12 },
+      { id: "robot",       num: "14", name: "MECHA BOT YAGEL",         rarity: "EPIC",         bonus: 1.00, price: 5e13 },
+      { id: "ghost",       num: "15", name: "GHOSTED CHAT YAGEL",      rarity: "LEGENDARY",    bonus: 1.25, price: 4.5e14 },
+      { id: "bolt",        num: "16", name: "THUNDERBOLT YAGEL",       rarity: "LEGENDARY",    bonus: 1.50, price: 4e15 },
+      { id: "bomb",        num: "17", name: "CHAT NUKE BOMB YAGEL",    rarity: "LEGENDARY",    bonus: 1.80, price: 3.8e16 },
+      { id: "pizza",       num: "18", name: "3AM PIZZA YAGEL",         rarity: "LEGENDARY",    bonus: 2.15, price: 3.5e17 },
+      { id: "cactus",      num: "19", name: "DESERT CACTUS YAGEL",     rarity: "LEGENDARY",    bonus: 2.55, price: 3.2e18 },
+      { id: "eyes",        num: "20", name: "SUS EYES YAGEL",          rarity: "MYTHIC",       bonus: 3.00, price: 3e19 },
+      { id: "brain",       num: "21", name: "MEGA BRAIN YAGEL",        rarity: "MYTHIC",       bonus: 3.60, price: 3e20 },
+      { id: "rocket",      num: "22", name: "TO THE MOON YAGEL",       rarity: "MYTHIC",       bonus: 4.30, price: 3.2e21 },
+      { id: "diamond",     num: "23", name: "ICE DIAMOND YAGEL",       rarity: "MYTHIC",       bonus: 5.10, price: 3.5e22 },
+      { id: "dragon",      num: "24", name: "EMERALD DRAGON YAGEL",    rarity: "MYTHIC",       bonus: 6.00, price: 4e23 },
+      { id: "ufo",         num: "25", name: "MOTHERSHIP UFO YAGEL",    rarity: "TRANSCENDENT", bonus: 7.50, price: 5e25 },
+      { id: "radioactive", num: "26", name: "RADIOACTIVE YAGEL",       rarity: "TRANSCENDENT", bonus: 9.50, price: 7.5e27 },
+      { id: "vortex",      num: "27", name: "BLACK HOLE VORTEX YAGEL", rarity: "TRANSCENDENT", bonus: 12.0, price: 1.2e30 },
+      { id: "trophy",      num: "28", name: "WORLD CHAMPION YAGEL",    rarity: "TRANSCENDENT", bonus: 15.0, price: 2.5e32 },
+      { id: "infinity",    num: "29", name: "INFINITY ORB YAGEL",      rarity: "TRANSCENDENT", bonus: 20.0, price: 5e34 },
+      { id: "god",         num: "30", name: "ASCENDED GOD-EYE YAGEL",  rarity: "TRANSCENDENT", bonus: 30.0, price: 1.5e37 }
+    ];
+
+    /**
+     * 18 Deep-Progression Upgrades (Click Power & Passive Generators)
+     * Every 25 levels doubles that upgrade's output, enabling absurd endgame scaling!
+     */
+    const UPGRADES_DATA = [
+      { id: "u1",  name: "THUMB WORKOUT",            type: "click", baseCost: 15,      growth: 1.16, power: 1,       desc: "Stronger taps on Yagel's forehead." },
+      { id: "u2",  name: "WHATSAPP FORWARD",         type: "yps",   baseCost: 50,      growth: 1.15, power: 1,       desc: "Auto-sends Yagel sticker to family chat." },
+      { id: "u3",  name: "DOUBLE-TAP MACRO",         type: "click", baseCost: 350,     growth: 1.17, power: 8,       desc: "Taps twice before the sticker settles." },
+      { id: "u4",  name: "GROUP CHAT SPAMMER",       type: "yps",   baseCost: 1100,    growth: 1.15, power: 14,      desc: "Floods the homies chat 24/7." },
+      { id: "u5",  name: "JPEG COMPRESSION",         type: "click", baseCost: 8500,    growth: 1.18, power: 95,      desc: "Crustier pixels yield denser YagelCoins." },
+      { id: "u6",  name: "STICKER PACK EXPORT",      type: "yps",   baseCost: 24000,   growth: 1.16, power: 210,     desc: "Distributes Yagel packs across Discord." },
+      { id: "u7",  name: "MECHANICAL PIXEL SWITCH",  type: "click", baseCost: 180000,  growth: 1.18, power: 1600,    desc: "Tactile clicky switches for max CPS." },
+      { id: "u8",  name: "DEEP-FRIED MEME FARM",     type: "yps",   baseCost: 550000,  growth: 1.16, power: 3800,    desc: "Industrial servers deep-frying Yagel." },
+      { id: "u9",  name: "GOLDEN CURSOR OVERCLOCK",  type: "click", baseCost: 4.5e6,   growth: 1.19, power: 32000,   desc: "Overvolts your mouse sensor to 8000Hz." },
+      { id: "u10", name: "VIRAL TIKTOK SOUND",       type: "yps",   baseCost: 1.5e7,   growth: 1.17, power: 85000,   desc: "Yagel's smirk trends globally." },
+      { id: "u11", name: "EMOJI SYNTHESIZER",        type: "click", baseCost: 1.8e8,   growth: 1.19, power: 950000,  desc: "Fuses 100 emojis per single click." },
+      { id: "u12", name: "YAGEL AI CLONE ARMY",      type: "yps",   baseCost: 6.5e8,   growth: 1.17, power: 2.8e6,   desc: "Millions of neural Yagels clicking." },
+      { id: "u13", name: "QUANTUM PIXEL SPLITTER",   type: "click", baseCost: 1.2e10,  growth: 1.20, power: 4.5e7,   desc: "Splits every single pixel into 64 coins." },
+      { id: "u14", name: "SATELLITE MEME RELAY",     type: "yps",   baseCost: 5e10,    growth: 1.18, power: 1.6e8,   desc: "Beams Yagel stickers from low orbit." },
+      { id: "u15", name: "HYPER-DIMENSIONAL TAP",    type: "click", baseCost: 2.5e12,  growth: 1.21, power: 7.5e9,   desc: "Clicks Yagel across parallel timelines." },
+      { id: "u16", name: "DYSON STICKER SPHERE",     type: "yps",   baseCost: 1.5e13,  growth: 1.19, power: 3.2e10,  desc: "Harnesses a star to render Yagel." },
+      { id: "u17", name: "OMEGA CLICK SINGULARITY",  type: "click", baseCost: 5e15,    growth: 1.22, power: 1.8e13,  desc: "Collapses spacetime into pure YagelCoins." },
+      { id: "u18", name: "MULTIVERSE YAGEL ENGINE",  type: "yps",   baseCost: 4e16,    growth: 1.20, power: 9.5e13,  desc: "Infinite realities minting YagelCoins." }
+    ];
+
+    /**
+     * 12 Animated Pixel-Art Backgrounds — Purchased with YagelCoins
+     */
+    const BACKGROUNDS_DATA = [
+      { id: "whatsapp",  name: "WHATSAPP DARK CHAT",   price: 0,       desc: "Classic dark green-slate messaging wallpaper." },
+      { id: "bliss",     name: "WINDOWS XP BLISS",     price: 5000,    desc: "Rolling 8-bit green hills & puffy clouds." },
+      { id: "arcade",    name: "NEON ARCADE GRID",     price: 150000,  desc: "Synthwave perspective grid in motion." },
+      { id: "matrix",    name: "CYBER MATRIX RAIN",    price: 4.5e6,   desc: "Cascading green digital Yagel code." },
+      { id: "sunset",    name: "VAPORWAVE SUNSET",     price: 1.2e8,   desc: "Striped retro sun over pixel ocean waves." },
+      { id: "lava",      name: "VOLCANO DUNGEON",      price: 3.5e9,   desc: "Bubbling magma & floating ember sparks." },
+      { id: "nebula",    name: "DEEP SPACE NEBULA",    price: 1.2e11,  desc: "Twinkling starfield & cosmic dust." },
+      { id: "vault",     name: "GOLDEN COIN VAULT",    price: 4.5e12,  desc: "Raining pixelated YagelCoins everywhere." },
+      { id: "vhs",       name: "DEEP-FRIED VHS STATIC",price: 2e14,    desc: "Glitching CRT scanlines & RGB distortion." },
+      { id: "heaven",    name: "CLOUD TEMPLE HEAVEN",  price: 1.5e17,  desc: "Divine golden sunbeams & floating pillars." },
+      { id: "glitch",    name: "404 CORRUPTED REALM",  price: 2.5e21,  desc: "Fractured reality blocks shifting live." },
+      { id: "omniverse", name: "OMNIVERSE GOD VOID",   price: 1e28,    desc: "Transcendent rainbow cosmic geometry." }
+    ];
+
+    // ============================================================================
+    // 5. PERSISTENT GAME STATE & SAVE/LOAD ENGINE
+    // ============================================================================
+    const SAVE_KEY = "yagel_clicker_save_v1";
+
+    let state = {
+      coins: 0,
+      totalCoinsEarned: 0,
+      totalClicks: 0,
+      equippedSkin: "like",
+      unlockedSkins: ["like"],
+      equippedBg: "whatsapp",
+      unlockedBgs: ["whatsapp"],
+      upgrades: {}, // { u1: level, ... }
+      soundEnabled: true,
+      lastSaveTime: Date.now()
+    };
+
+    // Runtime volatile state
+    let comboMeter = 0; // 0 to 100
+    let currentModalTab = null; // 'upgrades' | 'skinShop' | 'wardrobe' | 'bgShop' | 'save'
+    let buyMultiplier = 1; // 1, 10, 25, or 'MAX'
+    let goldenActive = false;
+    let goldenTimer = null;
+
+    function getSkinBonusMultiplier() {
+      let totalBonus = 0;
+      for (const sId of state.unlockedSkins) {
+        const skin = SKINS_DATA.find(s => s.id === sId);
+        if (skin) totalBonus += skin.bonus;
+      }
+      return 1 + totalBonus;
+    }
+
+    function getUpgradeMultiplier(level) {
+      // Every 25 levels doubles the upgrade's efficiency!
+      const milestones = Math.floor(level / 25);
+      return Math.pow(2, milestones);
+    }
+
+    function calculateYPC() {
+      let baseClick = 1;
+      for (const u of UPGRADES_DATA) {
+        if (u.type === "click") {
+          const lvl = state.upgrades[u.id] || 0;
+          if (lvl > 0) {
+            baseClick += u.power * lvl * getUpgradeMultiplier(lvl);
+          }
+        }
+      }
+      const comboMult = 1 + Math.floor(comboMeter / 20) * 0.25; // up to 2.25x on fast clicks
+      return baseClick * getSkinBonusMultiplier() * comboMult;
+    }
+
+    function calculateYPS() {
+      let baseYps = 0;
+      for (const u of UPGRADES_DATA) {
+        if (u.type === "yps") {
+          const lvl = state.upgrades[u.id] || 0;
+          if (lvl > 0) {
+            baseYps += u.power * lvl * getUpgradeMultiplier(lvl);
+          }
+        }
+      }
+      return baseYps * getSkinBonusMultiplier();
+    }
+
+    function getUpgradeBulkCost(u, currentLvl, count) {
+      let total = 0;
+      for (let i = 0; i < count; i++) {
+        total += Math.floor(u.baseCost * Math.pow(u.growth, currentLvl + i));
+      }
+      return total;
+    }
+
+    function getMaxAffordableLevels(u, currentLvl, budget) {
+      let count = 0;
+      let totalCost = 0;
+      while (count < 500) {
+        const nextCost = Math.floor(u.baseCost * Math.pow(u.growth, currentLvl + count));
+        if (totalCost + nextCost <= budget) {
+          totalCost += nextCost;
+          count++;
+        } else {
+          break;
+        }
+      }
+      return { count, totalCost };
+    }
+
+    function saveGame(silent = true) {
+      try {
+        state.lastSaveTime = Date.now();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        if (!silent) showToast("GAME SAVED!");
+      } catch (e) {
+        if (!silent) showToast("SAVE FAILED (STORAGE FULL)");
+      }
+    }
+
+    function loadGame() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        state = { ...state, ...parsed };
+        sfx.enabled = state.soundEnabled !== false;
+
+        // Calculate Offline Idle Earnings (capped at 14 days for long-term play)
+        const now = Date.now();
+        const elapsedSec = Math.min(Math.max(0, (now - (state.lastSaveTime || now)) / 1000), 14 * 86400);
+        const yps = calculateYPS();
+        if (elapsedSec > 10 && yps > 0) {
+          const offlineGain = yps * elapsedSec * 0.5; // 50% offline efficiency
+          state.coins += offlineGain;
+          state.totalCoinsEarned += offlineGain;
+          setTimeout(() => {
+            showToast(`WELCOME BACK! OFFLINE EARNINGS: +${formatNumber(offlineGain)} YAGELCOINS`);
+          }, 600);
+        }
+      } catch (e) {
+        console.warn("Could not load save:", e);
+      }
+    }
+
+    // ============================================================================
+    // 6. TOAST MESSAGE SYSTEM (Replaces alert() cleanly)
+    // ============================================================================
+    let toastTimeout = null;
+    function showToast(msg) {
+      const box = document.getElementById("toastBox");
+      box.textContent = msg;
+      box.classList.remove("hidden");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        box.classList.add("hidden");
+      }, 2800);
+    }
+
+    // ============================================================================
+    // 7. FLOATING PARTICLES & POPUP NUMBERS CANVAS
+    // ============================================================================
+    const fxCanvas = document.getElementById("fxCanvas");
+    const fxCtx = fxCanvas.getContext("2d");
+    let floatingTexts = [];
+    let coinParticles = [];
+
+    function resizeCanvases() {
+      fxCanvas.width = window.innerWidth;
+      fxCanvas.height = window.innerHeight;
+      bgCanvas.width = Math.ceil(window.innerWidth / 4);
+      bgCanvas.height = Math.ceil(window.innerHeight / 4);
+    }
+
+    function spawnClickFX(clientX, clientY, amount) {
+      // Floating "+X" pixel text
+      floatingTexts.push({
+        x: clientX + (Math.random() - 0.5) * 30,
+        y: clientY - 14,
+        vy: -1.8 - Math.random() * 0.8,
+        text: "+" + formatNumber(amount),
+        life: 1.0
+      });
+
+      // Burst of pixel YagelCoins
+      const count = Math.min(6, 2 + Math.floor(comboMeter / 25));
+      for (let i = 0; i < count; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.6;
+        const speed = 2.5 + Math.random() * 4;
+        coinParticles.push({
+          x: clientX,
+          y: clientY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.5,
+          life: 1.0
+        });
+      }
+    }
+
+    function updateAndDrawFX() {
+      fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+      fxCtx.imageSmoothingEnabled = false;
+
+      // Update & Draw Coin Particles
+      for (let i = coinParticles.length - 1; i >= 0; i--) {
+        const p = coinParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.25; // gravity
+        p.life -= 0.025;
+        if (p.life <= 0) {
+          coinParticles.splice(i, 1);
+          continue;
+        }
+        fxCtx.globalAlpha = Math.max(0, p.life);
+        fxCtx.fillStyle = "#000000";
+        fxCtx.fillRect(Math.floor(p.x) - 5, Math.floor(p.y) - 5, 10, 10);
+        fxCtx.fillStyle = "#ffd541";
+        fxCtx.fillRect(Math.floor(p.x) - 4, Math.floor(p.y) - 4, 8, 8);
+        fxCtx.fillStyle = "#fff3b0";
+        fxCtx.fillRect(Math.floor(p.x) - 3, Math.floor(p.y) - 3, 3, 3);
+      }
+
+      // Update & Draw Floating Texts
+      fxCtx.font = "12px 'Press Start 2P', monospace";
+      fxCtx.textAlign = "center";
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy;
+        ft.life -= 0.02;
+        if (ft.life <= 0) {
+          floatingTexts.splice(i, 1);
+          continue;
+        }
+        fxCtx.globalAlpha = Math.max(0, ft.life);
+        fxCtx.fillStyle = "#000000";
+        fxCtx.fillText(ft.text, Math.floor(ft.x) + 2, Math.floor(ft.y) + 2);
+        fxCtx.fillStyle = "#ffd541";
+        fxCtx.fillText(ft.text, Math.floor(ft.x), Math.floor(ft.y));
+      }
+      fxCtx.globalAlpha = 1;
+    }
+
+    // ============================================================================
+    // 8. ANIMATED PIXEL-ART BACKGROUNDS ENGINE (12 Unique Themes)
+    // ============================================================================
+    const bgCanvas = document.getElementById("bgCanvas");
+    const bgCtx = bgCanvas.getContext("2d");
+    let bgTick = 0;
+
+    function renderBackgroundScene(ctx, w, h, bgId, t) {
+      ctx.imageSmoothingEnabled = false;
+
+      switch (bgId) {
+        case "whatsapp": {
+          ctx.fillStyle = "#0b141a";
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = "#111f27";
+          for (let y = 0; y < h; y += 16) {
+            for (let x = 0; x < w; x += 16) {
+              const offset = ((y / 16) % 2) * 8;
+              ctx.fillRect((x + offset) % w, y, 4, 4);
+              ctx.fillRect((x + offset + 6) % w, y + 6, 2, 2);
+            }
+          }
+          break;
+        }
+        case "bliss": {
+          // Windows XP Pixel Bliss
+          ctx.fillStyle = "#3b82f6";
+          ctx.fillRect(0, 0, w, h);
+          // Pixel clouds
+          ctx.fillStyle = "#ffffff";
+          for (let i = 0; i < 5; i++) {
+            const cx = Math.floor(((i * 90 + t * 0.25) % (w + 60)) - 30);
+            const cy = 18 + (i % 3) * 18;
+            ctx.fillRect(cx, cy, 28, 8);
+            ctx.fillRect(cx + 4, cy - 4, 18, 4);
+          }
+          // Rolling green hill
+          for (let x = 0; x < w; x++) {
+            const hillY = Math.floor(h * 0.62 + Math.sin(x * 0.025) * 14);
+            ctx.fillStyle = "#22c55e";
+            ctx.fillRect(x, hillY, 1, h - hillY);
+            ctx.fillStyle = "#16a34a";
+            ctx.fillRect(x, hillY + 12, 1, h - hillY);
+          }
+          break;
+        }
+        case "arcade": {
+          ctx.fillStyle = "#090418";
+          ctx.fillRect(0, 0, w, h);
+          const horizon = Math.floor(h * 0.45);
+          ctx.strokeStyle = "#d946ef";
+          ctx.lineWidth = 1;
+          for (let i = -8; i <= 8; i++) {
+            ctx.beginPath();
+            ctx.moveTo(w / 2 + i * 10, horizon);
+            ctx.lineTo(w / 2 + i * 48, h);
+            ctx.stroke();
+          }
+          const scroll = (t * 0.8) % 14;
+          for (let y = horizon; y < h; y += 14) {
+            const py = Math.floor(y + scroll);
+            ctx.fillStyle = "#06b6d4";
+            ctx.fillRect(0, py, w, 1);
+          }
+          break;
+        }
+        case "matrix": {
+          ctx.fillStyle = "#030d06";
+          ctx.fillRect(0, 0, w, h);
+          for (let x = 0; x < w; x += 6) {
+            const dropY = Math.floor(((x * 13 + t * 1.8) % (h + 40)) - 20);
+            ctx.fillStyle = "#15803d";
+            ctx.fillRect(x, dropY - 14, 3, 14);
+            ctx.fillStyle = "#4ade80";
+            ctx.fillRect(x, dropY, 3, 4);
+          }
+          break;
+        }
+        case "sunset": {
+          ctx.fillStyle = "#1e1035";
+          ctx.fillRect(0, 0, w, h);
+          const sunX = Math.floor(w / 2);
+          const sunY = Math.floor(h * 0.42);
+          const r = 28;
+          for (let dy = -r; dy <= r; dy++) {
+            if ((dy + Math.floor(t * 0.15)) % 5 === 0 && dy > 0) continue;
+            const span = Math.floor(Math.sqrt(r * r - dy * dy));
+            ctx.fillStyle = dy < 0 ? "#facc15" : "#f43f5e";
+            ctx.fillRect(sunX - span, sunY + dy, span * 2, 1);
+          }
+          ctx.fillStyle = "#0f172a";
+          ctx.fillRect(0, sunY + 12, w, h);
+          break;
+        }
+        case "lava": {
+          ctx.fillStyle = "#1c0a08";
+          ctx.fillRect(0, 0, w, h);
+          const lavaTop = Math.floor(h * 0.72);
+          ctx.fillStyle = "#dc2626";
+          ctx.fillRect(0, lavaTop, w, h - lavaTop);
+          ctx.fillStyle = "#f97316";
+          for (let x = 0; x < w; x += 8) {
+            const wave = Math.floor(Math.sin(x * 0.1 + t * 0.12) * 3);
+            ctx.fillRect(x, lavaTop + wave, 8, 5);
+          }
+          // Rising embers
+          ctx.fillStyle = "#facc15";
+          for (let i = 0; i < 14; i++) {
+            const ex = (i * 37 + Math.floor(t * 0.3)) % w;
+            const ey = h - ((i * 23 + Math.floor(t * 0.9)) % h);
+            ctx.fillRect(ex, ey, 2, 2);
+          }
+          break;
+        }
+        case "nebula": {
+          ctx.fillStyle = "#060714";
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = "#311042";
+          ctx.fillRect(Math.floor(w * 0.2), Math.floor(h * 0.2), Math.floor(w * 0.6), Math.floor(h * 0.5));
+          for (let i = 0; i < 40; i++) {
+            const sx = (i * 53) % w;
+            const sy = (i * 29) % h;
+            ctx.fillStyle = (i + Math.floor(t * 0.08)) % 4 === 0 ? "#ffd541" : "#ffffff";
+            ctx.fillRect(sx, sy, (i % 2) + 1, (i % 2) + 1);
+          }
+          break;
+        }
+        case "vault": {
+          ctx.fillStyle = "#1f1605";
+          ctx.fillRect(0, 0, w, h);
+          // Gold bricks bottom
+          ctx.fillStyle = "#d97706";
+          ctx.fillRect(0, h - 18, w, 18);
+          // Falling pixel coins
+          for (let i = 0; i < 18; i++) {
+            const cx = (i * 41) % w;
+            const cy = (i * 19 + Math.floor(t * 1.4)) % h;
+            ctx.fillStyle = "#ffd541";
+            ctx.fillRect(cx, cy, 4, 4);
+            ctx.fillStyle = "#fef08a";
+            ctx.fillRect(cx, cy, 2, 2);
+          }
+          break;
+        }
+        case "vhs": {
+          ctx.fillStyle = "#141414";
+          ctx.fillRect(0, 0, w, h);
+          for (let y = 0; y < h; y += 3) {
+            ctx.fillStyle = (y + Math.floor(t)) % 6 === 0 ? "#262626" : "#0f0f0f";
+            ctx.fillRect(0, y, w, 1);
+          }
+          const barY = Math.floor((t * 1.5) % h);
+          ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
+          ctx.fillRect(0, barY, w, 6);
+          ctx.fillStyle = "rgba(56, 189, 248, 0.25)";
+          ctx.fillRect(0, (barY + 3) % h, w, 4);
+          break;
+        }
+        case "heaven": {
+          ctx.fillStyle = "#bae6fd";
+          ctx.fillRect(0, 0, w, h);
+          // Sunbeams
+          ctx.fillStyle = "rgba(254, 240, 138, 0.45)";
+          ctx.fillRect(Math.floor(w * 0.35), 0, Math.floor(w * 0.3), h);
+          // Fluffy bottom clouds
+          ctx.fillStyle = "#ffffff";
+          for (let x = -10; x < w + 20; x += 24) {
+            const bob = Math.floor(Math.sin(x + t * 0.08) * 2);
+            ctx.fillRect(x, h - 22 + bob, 26, 24);
+            ctx.fillRect(x + 4, h - 26 + bob, 16, 6);
+          }
+          break;
+        }
+        case "glitch": {
+          ctx.fillStyle = "#09090b";
+          ctx.fillRect(0, 0, w, h);
+          const colors = ["#ef4444", "#22c55e", "#3b82f6", "#facc15", "#a855f7"];
+          for (let i = 0; i < 16; i++) {
+            const gx = Math.floor(Math.abs(Math.sin(i * 12.3 + Math.floor(t * 0.2))) * w);
+            const gy = Math.floor(Math.abs(Math.cos(i * 7.7 + Math.floor(t * 0.15))) * h);
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fillRect(gx, gy, 18, 4);
+          }
+          break;
+        }
+        case "omniverse": {
+          ctx.fillStyle = "#05010d";
+          ctx.fillRect(0, 0, w, h);
+          const cx = Math.floor(w / 2);
+          const cy = Math.floor(h / 2);
+          const rings = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#a855f7"];
+          for (let r = 5; r >= 1; r--) {
+            const rad = r * 16 + Math.floor(Math.sin(t * 0.08 + r) * 4);
+            ctx.strokeStyle = rings[(r + Math.floor(t * 0.05)) % rings.length];
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cx - rad, cy - rad, rad * 2, rad * 2);
+          }
+          break;
+        }
+      }
+    }
+
+    // ============================================================================
+    // 9. CORE INTERACTIONS: CLICKING, GOLDEN GLITCH YAGEL, MODALS
+    // ============================================================================
+    function handleStickerClick(e) {
+      e.preventDefault();
+      const rect = document.getElementById("mainStickerCanvas").getBoundingClientRect();
+      const cx = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : rect.left + rect.width / 2);
+      const cy = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : rect.top + rect.height / 2);
+
+      // Increase hype combo
+      comboMeter = Math.min(100, comboMeter + 8);
+      const gain = calculateYPC();
+
+      state.coins += gain;
+      state.totalCoinsEarned += gain;
+      state.totalClicks += 1;
+
+      // Visual squash animation
+      const canvasEl = document.getElementById("mainStickerCanvas");
+      canvasEl.classList.remove("sticker-squash");
+      void canvasEl.offsetWidth; // trigger reflow
+      canvasEl.classList.add("sticker-squash");
+      setTimeout(() => canvasEl.classList.remove("sticker-squash"), 75);
+
+      sfx.click(Math.floor(comboMeter / 10));
+      spawnClickFX(cx, cy, gain);
+      updateHUD();
+    }
+
+    // Golden Glitch Yagel Random Spawner
+    function scheduleGoldenYagel() {
+      const delay = (35 + Math.random() * 45) * 1000; // every 35-80s
+      goldenTimer = setTimeout(() => {
+        if (!document.getElementById("gameScreen").classList.contains("hidden") && !goldenActive) {
+          spawnGoldenYagel();
+        }
+        scheduleGoldenYagel();
+      }, delay);
+    }
+
+    function spawnGoldenYagel() {
+      goldenActive = true;
+      const btn = document.getElementById("goldenYagelBtn");
+      const stage = document.getElementById("centerStage");
+      const maxX = Math.max(20, stage.clientWidth - 90);
+      const maxY = Math.max(40, stage.clientHeight - 110);
+      btn.style.left = (15 + Math.random() * maxX) + "px";
+      btn.style.top = (35 + Math.random() * maxY) + "px";
+
+      // Draw random rare sticker inside golden popup
+      const randomSkin = SKINS_DATA[Math.floor(Math.random() * SKINS_DATA.length)];
+      drawStickerOnto(document.getElementById("goldenYagelCanvas"), randomSkin.id);
+      btn.classList.remove("hidden");
+
+      setTimeout(() => {
+        btn.classList.add("hidden");
+        goldenActive = false;
+      }, 9000);
+    }
+
+    document.getElementById("goldenYagelBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!goldenActive) return;
+      goldenActive = false;
+      document.getElementById("goldenYagelBtn").classList.add("hidden");
+
+      const bonus = Math.max(calculateYPC() * 45, calculateYPS() * 25, 250);
+      state.coins += bonus;
+      state.totalCoinsEarned += bonus;
+      comboMeter = 100;
+
+      sfx.golden();
+      spawnClickFX(e.clientX, e.clientY, bonus);
+      showToast(`GOLDEN GLITCH YAGEL! +${formatNumber(bonus)} YAGELCOINS!`);
+      updateHUD();
+    });
+
+    // ============================================================================
+    // 10. UI & SHOP RENDERING (UPGRADES, 30 SKINS SHOP, WARDROBE, BACKGROUNDS)
+    // ============================================================================
+    function updateHUD() {
+      document.getElementById("hudCoins").textContent = formatNumber(state.coins);
+      document.getElementById("hudYpc").textContent = formatNumber(calculateYPC());
+      document.getElementById("hudYps").textContent = formatNumber(calculateYPS());
+
+      const bonusPct = Math.round((getSkinBonusMultiplier() - 1) * 100);
+      document.getElementById("hudSkinBonus").textContent = `+${formatNumber(bonusPct)}%`;
+
+      // Active Skin Banner
+      const activeSkin = SKINS_DATA.find(s => s.id === state.equippedSkin) || SKINS_DATA[0];
+      document.getElementById("activeSkinTitle").textContent = `#${activeSkin.num} ${activeSkin.name}`;
+      const rarityEl = document.getElementById("activeSkinRarity");
+      rarityEl.textContent = `${activeSkin.rarity} • +${Math.round(activeSkin.bonus * 100)}% GLOBAL`;
+      rarityEl.className = "rarity-" + activeSkin.rarity.toLowerCase();
+
+      // Combo meter UI
+      const comboMult = (1 + Math.floor(comboMeter / 20) * 0.25).toFixed(2);
+      document.getElementById("comboMultiplierText").textContent = `x${comboMult}`;
+      document.getElementById("comboBarFill").style.width = `${comboMeter}%`;
+
+      if (currentModalTab) {
+        document.getElementById("modalBalanceText").textContent = `YAGELCOINS: ${formatNumber(state.coins)}`;
+      }
+    }
+
+    function openModal(tab) {
+      currentModalTab = tab;
+      const overlay = document.getElementById("modalOverlay");
+      const title = document.getElementById("modalTitle");
+      const extra = document.getElementById("modalExtraControls");
+      const body = document.getElementById("modalBody");
+
+      overlay.classList.remove("hidden");
+      extra.innerHTML = "";
+      body.innerHTML = "";
+      document.getElementById("modalBalanceText").textContent = `YAGELCOINS: ${formatNumber(state.coins)}`;
+
+      if (tab === "upgrades") {
+        title.textContent = "⚡ YAGEL UPGRADES SHOP";
+        [1, 10, 25, "MAX"].forEach(mult => {
+          const b = document.createElement("button");
+          b.className = "px-btn " + (buyMultiplier === mult ? "px-btn-gold" : "");
+          b.style.padding = "4px 8px";
+          b.style.fontSize = "8px";
+          b.textContent = mult === "MAX" ? "BUY MAX" : `x${mult}`;
+          b.onclick = () => {
+            buyMultiplier = mult;
+            openModal("upgrades");
+          };
+          extra.appendChild(b);
+        });
+        renderUpgradesList(body);
+      } else if (tab === "skinShop") {
+        title.textContent = `🛒 STICKER SKIN SHOP (${state.unlockedSkins.length}/30)`;
+        extra.innerHTML = `<span style="color:#ffd541;">ALL 30 EMOJI STICKERS GRANT GLOBAL MULTIPLIERS!</span>`;
+        renderSkinShop(body);
+      } else if (tab === "wardrobe") {
+        title.textContent = `🎭 MY STICKER WARDROBE (${state.unlockedSkins.length}/30)`;
+        extra.innerHTML = `<span style="color:#38b764;">EQUIP ANY UNLOCKED YAGEL STICKER</span>`;
+        renderWardrobe(body);
+      } else if (tab === "bgShop") {
+        title.textContent = `🖼️ PIXEL BACKGROUNDS (${state.unlockedBgs.length}/12)`;
+        extra.innerHTML = `<span style="color:#41a6f6;">CUSTOMIZE YOUR CLICK ARENA</span>`;
+        renderBackgroundShop(body);
+      } else if (tab === "save") {
+        title.textContent = "💾 SAVE / EXPORT / IMPORT";
+        renderSaveManager(body);
+      }
+    }
+
+    function closeModal() {
+      currentModalTab = null;
+      document.getElementById("modalOverlay").classList.add("hidden");
+    }
+
+    function renderUpgradesList(container) {
+      UPGRADES_DATA.forEach(u => {
+        const lvl = state.upgrades[u.id] || 0;
+        let countToBuy = 1;
+        let cost = 0;
+
+        if (buyMultiplier === "MAX") {
+          const res = getMaxAffordableLevels(u, lvl, state.coins);
+          countToBuy = Math.max(1, res.count);
+          cost = res.count > 0 ? res.totalCost : getUpgradeBulkCost(u, lvl, 1);
+        } else {
+          countToBuy = buyMultiplier;
+          cost = getUpgradeBulkCost(u, lvl, countToBuy);
+        }
+
+        const nextMilestone = (Math.floor(lvl / 25) + 1) * 25;
+        const unitGain = u.power * getUpgradeMultiplier(lvl) * getSkinBonusMultiplier();
+        const canAfford = state.coins >= cost;
+
+        const card = document.createElement("div");
+        card.className = "upgrade-card";
+        card.innerHTML = `
+          <div class="upgrade-info">
+            <div class="upgrade-name">
+              ${u.name} <span class="upgrade-lvl">LVL ${lvl}</span>
+            </div>
+            <div class="upgrade-desc">${u.desc} (2x BONUS AT LVL ${nextMilestone})</div>
+            <div class="upgrade-effect">
+              +${formatNumber(unitGain)} ${u.type === "click" ? "YPC" : "YPS"} EACH
+            </div>
+          </div>
+          <button class="px-btn ${canAfford ? "px-btn-green" : ""}" ${canAfford ? "" : "disabled"}>
+            BUY +${countToBuy}<br>${formatNumber(cost)}
+          </button>
+        `;
+
+        card.querySelector("button").onclick = () => {
+          if (state.coins < cost) {
+            sfx.error();
+            return;
+          }
+          state.coins -= cost;
+          state.upgrades[u.id] = lvl + countToBuy;
+          sfx.buy();
+          updateHUD();
+          openModal("upgrades");
+        };
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderSkinShop(container) {
+      const grid = document.createElement("div");
+      grid.className = "skin-grid";
+
+      SKINS_DATA.forEach(skin => {
+        const owned = state.unlockedSkins.includes(skin.id);
+        const equipped = state.equippedSkin === skin.id;
+        const canAfford = state.coins >= skin.price;
+
+        const card = document.createElement("div");
+        card.className = "skin-card" + (equipped ? " equipped" : "");
+
+        const thumb = document.createElement("canvas");
+        thumb.width = 64;
+        thumb.height = 80;
+        thumb.className = "skin-thumb";
+        drawStickerOnto(thumb, skin.id);
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "skin-title";
+        titleEl.textContent = `#${skin.num} ${skin.name}`;
+
+        const rarityEl = document.createElement("div");
+        rarityEl.className = "rarity-" + skin.rarity.toLowerCase();
+        rarityEl.style.fontSize = "8px";
+        rarityEl.textContent = `${skin.rarity} (+${Math.round(skin.bonus * 100)}%)`;
+
+        const btn = document.createElement("button");
+        btn.style.width = "100%";
+        btn.style.fontSize = "8px";
+
+        if (equipped) {
+          btn.className = "px-btn px-btn-green";
+          btn.textContent = "✓ EQUIPPED";
+          btn.disabled = true;
+        } else if (owned) {
+          btn.className = "px-btn px-btn-purple";
+          btn.textContent = "EQUIP SKIN";
+          btn.onclick = () => {
+            state.equippedSkin = skin.id;
+            drawStickerOnto(document.getElementById("mainStickerCanvas"), skin.id);
+            sfx.equip();
+            updateHUD();
+            openModal("skinShop");
+          };
+        } else {
+          btn.className = "px-btn " + (canAfford ? "px-btn-gold" : "");
+          btn.disabled = !canAfford;
+          btn.textContent = skin.price === 0 ? "FREE" : `${formatNumber(skin.price)}`;
+          btn.onclick = () => {
+            if (state.coins < skin.price) {
+              sfx.error();
+              return;
+            }
+            state.coins -= skin.price;
+            state.unlockedSkins.push(skin.id);
+            state.equippedSkin = skin.id;
+            drawStickerOnto(document.getElementById("mainStickerCanvas"), skin.id);
+            sfx.buy();
+            showToast(`UNLOCKED #${skin.num} ${skin.name}!`);
+            updateHUD();
+            openModal("skinShop");
+          };
+        }
+
+        card.appendChild(thumb);
+        card.appendChild(titleEl);
+        card.appendChild(rarityEl);
+        card.appendChild(btn);
+        grid.appendChild(card);
+      });
+
+      container.appendChild(grid);
+    }
+
+    function renderWardrobe(container) {
+      const grid = document.createElement("div");
+      grid.className = "skin-grid";
+
+      SKINS_DATA.forEach(skin => {
+        const owned = state.unlockedSkins.includes(skin.id);
+        const equipped = state.equippedSkin === skin.id;
+
+        const card = document.createElement("div");
+        card.className = "skin-card" + (equipped ? " equipped" : "");
+        if (!owned) card.style.opacity = "0.45";
+
+        const thumb = document.createElement("canvas");
+        thumb.width = 64;
+        thumb.height = 80;
+        thumb.className = "skin-thumb";
+        if (owned) {
+          drawStickerOnto(thumb, skin.id);
+        } else {
+          const tctx = thumb.getContext("2d");
+          tctx.fillStyle = "#0d101b";
+          tctx.fillRect(0, 0, 64, 80);
+          tctx.fillStyle = "#5a6988";
+          tctx.font = "20px monospace";
+          tctx.textAlign = "center";
+          tctx.fillText("?", 32, 46);
+        }
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "skin-title";
+        titleEl.textContent = owned ? `#${skin.num} ${skin.name}` : `#${skin.num} LOCKED STICKER`;
+
+        const btn = document.createElement("button");
+        btn.style.width = "100%";
+        btn.style.fontSize = "8px";
+
+        if (!owned) {
+          btn.className = "px-btn";
+          btn.textContent = "BUY IN SHOP";
+          btn.disabled = true;
+        } else if (equipped) {
+          btn.className = "px-btn px-btn-green";
+          btn.textContent = "✓ EQUIPPED";
+          btn.disabled = true;
+        } else {
+          btn.className = "px-btn px-btn-purple";
+          btn.textContent = "WEAR STICKER";
+          btn.onclick = () => {
+            state.equippedSkin = skin.id;
+            drawStickerOnto(document.getElementById("mainStickerCanvas"), skin.id);
+            sfx.equip();
+            showToast(`EQUIPPED #${skin.num} ${skin.name}`);
+            updateHUD();
+            openModal("wardrobe");
+          };
+        }
+
+        card.appendChild(thumb);
+        card.appendChild(titleEl);
+        card.appendChild(btn);
+        grid.appendChild(card);
+      });
+
+      container.appendChild(grid);
+    }
+
+    function renderBackgroundShop(container) {
+      const grid = document.createElement("div");
+      grid.className = "bg-grid";
+
+      BACKGROUNDS_DATA.forEach(bg => {
+        const owned = state.unlockedBgs.includes(bg.id);
+        const equipped = state.equippedBg === bg.id;
+        const canAfford = state.coins >= bg.price;
+
+        const card = document.createElement("div");
+        card.className = "bg-card" + (equipped ? " equipped" : "");
+
+        const prev = document.createElement("canvas");
+        prev.width = 120;
+        prev.height = 54;
+        prev.className = "bg-preview-canvas";
+        renderBackgroundScene(prev.getContext("2d"), 120, 54, bg.id, 35);
+
+        const nameEl = document.createElement("div");
+        nameEl.style.fontSize = "10px";
+        nameEl.style.color = "#fff";
+        nameEl.textContent = bg.name;
+
+        const descEl = document.createElement("div");
+        descEl.style.fontSize = "8px";
+        descEl.style.color = "#94a3b8";
+        descEl.textContent = bg.desc;
+
+        const btn = document.createElement("button");
+        btn.style.fontSize = "8px";
+
+        if (equipped) {
+          btn.className = "px-btn px-btn-green";
+          btn.textContent = "✓ ACTIVE";
+          btn.disabled = true;
+        } else if (owned) {
+          btn.className = "px-btn px-btn-blue";
+          btn.textContent = "USE BACKGROUND";
+          btn.onclick = () => {
+            state.equippedBg = bg.id;
+            sfx.equip();
+            openModal("bgShop");
+          };
+        } else {
+          btn.className = "px-btn " + (canAfford ? "px-btn-gold" : "");
+          btn.disabled = !canAfford;
+          btn.textContent = `${formatNumber(bg.price)} COINS`;
+          btn.onclick = () => {
+            if (state.coins < bg.price) {
+              sfx.error();
+              return;
+            }
+            state.coins -= bg.price;
+            state.unlockedBgs.push(bg.id);
+            state.equippedBg = bg.id;
+            sfx.buy();
+            showToast(`UNLOCKED BACKGROUND: ${bg.name}!`);
+            updateHUD();
+            openModal("bgShop");
+          };
+        }
+
+        card.appendChild(prev);
+        card.appendChild(nameEl);
+        card.appendChild(descEl);
+        card.appendChild(btn);
+        grid.appendChild(card);
+      });
+
+      container.appendChild(grid);
+    }
+
+    function renderSaveManager(container) {
+      const encoded = btoa(JSON.stringify(state));
+      container.innerHTML = `
+        <div class="px-panel" style="padding:12px;background:#21263b;">
+          <div style="margin-bottom:8px;color:#ffd541;">LIFETIME STATS</div>
+          <div style="font-size:9px;line-height:1.8;">
+            • TOTAL COINS EARNED: ${formatNumber(state.totalCoinsEarned)}<br>
+            • TOTAL CLICKS: ${formatNumber(state.totalClicks)}<br>
+            • STICKERS UNLOCKED: ${state.unlockedSkins.length} / 30<br>
+            • BACKGROUNDS UNLOCKED: ${state.unlockedBgs.length} / 12
+          </div>
+        </div>
+
+        <div class="px-panel" style="padding:12px;background:#21263b;">
+          <div style="margin-bottom:6px;color:#41a6f6;">EXPORT / IMPORT SAVE CODE</div>
+          <p style="font-size:8px;color:#94a3b8;margin:0 0 8px 0;">
+            Copy this save code to back up your months of Yagel progress, or paste a code below to restore.
+          </p>
+          <textarea id="saveCodeBox" class="save-textarea">${encoded}</textarea>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+            <button id="copySaveBtn" class="px-btn px-btn-green">📋 COPY CODE</button>
+            <button id="importSaveBtn" class="px-btn px-btn-gold">📥 LOAD CODE</button>
+            <button id="manualSaveBtn" class="px-btn px-btn-blue">💾 FORCE SAVE</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("copySaveBtn").onclick = () => {
+        const box = document.getElementById("saveCodeBox");
+        box.select();
+        document.execCommand("copy");
+        showToast("SAVE CODE COPIED TO CLIPBOARD!");
+      };
+
+      document.getElementById("manualSaveBtn").onclick = () => saveGame(false);
+
+      document.getElementById("importSaveBtn").onclick = () => {
+        try {
+          const val = document.getElementById("saveCodeBox").value.trim();
+          const decoded = JSON.parse(atob(val));
+          if (typeof decoded.coins === "number") {
+            state = { ...state, ...decoded };
+            saveGame(true);
+            drawStickerOnto(document.getElementById("mainStickerCanvas"), state.equippedSkin);
+            updateHUD();
+            showToast("SAVE RESTORED SUCCESSFULLY!");
+            closeModal();
+          } else {
+            showToast("INVALID SAVE CODE!");
+          }
+        } catch (err) {
+          showToast("INVALID SAVE CODE FORMAT!");
+        }
+      };
+    }
+
+    // ============================================================================
+    // 11. NAVIGATION & SOUND CONTROLS
+    // ============================================================================
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      sfx.enabled = state.soundEnabled;
+      const label = state.soundEnabled ? "🔊 SFX: ON" : "🔇 SFX: OFF";
+      const icon = state.soundEnabled ? "🔊" : "🔇";
+      document.getElementById("homeSoundBtn").textContent = label;
+      document.getElementById("gameSoundBtn").textContent = icon;
+      if (state.soundEnabled) sfx.equip();
+      saveGame(true);
+    }
+
+    function updateHomePreview() {
+      drawStickerOnto(document.getElementById("homeStickerPreview"), state.equippedSkin);
+      const summary = document.getElementById("homeSaveSummary");
+      if (state.totalCoinsEarned > 0) {
+        summary.innerHTML = `
+          SAVED PROGRESS: <span style="color:#ffd541;">${formatNumber(state.coins)} COINS</span> •
+          SKINS: <span style="color:#38b764;">${state.unlockedSkins.length}/30</span>
+        `;
+      }
+    }
+
+    document.getElementById("playGameBtn").addEventListener("click", () => {
+      sfx.init();
+      sfx.buy();
+      document.getElementById("homeScreen").classList.add("hidden");
+      document.getElementById("gameScreen").classList.remove("hidden");
+      drawStickerOnto(document.getElementById("mainStickerCanvas"), state.equippedSkin);
+      updateHUD();
+    });
+
+    document.getElementById("goHomeBtn").addEventListener("click", () => {
+      saveGame(true);
+      updateHomePreview();
+      document.getElementById("gameScreen").classList.add("hidden");
+      document.getElementById("homeScreen").classList.remove("hidden");
+    });
+
+    document.getElementById("homeSoundBtn").addEventListener("click", toggleSound);
+    document.getElementById("gameSoundBtn").addEventListener("click", toggleSound);
+    document.getElementById("homeSaveMgrBtn").addEventListener("click", () => openModal("save"));
+    document.getElementById("gameSaveBtn").addEventListener("click", () => openModal("save"));
+
+    document.getElementById("stickerPedestal").addEventListener("pointerdown", handleStickerClick);
+
+    document.getElementById("openUpgradesBtn").addEventListener("click", () => openModal("upgrades"));
+    document.getElementById("openSkinShopBtn").addEventListener("click", () => openModal("skinShop"));
+    document.getElementById("openWardrobeBtn").addEventListener("click", () => openModal("wardrobe"));
+    document.getElementById("openBgShopBtn").addEventListener("click", () => openModal("bgShop"));
+    document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+
+    document.getElementById("modalOverlay").addEventListener("click", (e) => {
+      if (e.target.id === "modalOverlay") closeModal();
+    });
+
+    // ============================================================================
+    // 12. MAIN GAME LOOP & INITIALIZATION
+    // ============================================================================
+    let lastFrameTime = performance.now();
+    let autoSaveAccumulator = 0;
+
+    function mainLoop(now) {
+      const dt = Math.min((now - lastFrameTime) / 1000, 0.25);
+      lastFrameTime = now;
+      bgTick += dt * 30;
+
+      // Passive YagelCoins Per Second (YPS) income
+      const yps = calculateYPS();
+      if (yps > 0) {
+        const earned = yps * dt;
+        state.coins += earned;
+        state.totalCoinsEarned += earned;
+      }
+
+      // Decay click hype combo smoothly
+      if (comboMeter > 0) {
+        comboMeter = Math.max(0, comboMeter - dt * 16);
+      }
+
+      // Render animated pixel background
+      renderBackgroundScene(bgCtx, bgCanvas.width, bgCanvas.height, state.equippedBg, bgTick);
+
+      // Render particles & floating "+X" popups
+      updateAndDrawFX();
+
+      // Update HUD counters
+      updateHUD();
+
+      // Auto-save every 10 seconds
+      autoSaveAccumulator += dt;
+      if (autoSaveAccumulator >= 10) {
+        autoSaveAccumulator = 0;
+        saveGame(true);
+      }
+
+      requestAnimationFrame(mainLoop);
+    }
+
+    window.addEventListener("resize", resizeCanvases);
+
+    window.onload = function () {
+      loadGame();
+      resizeCanvases();
+      drawCoinIcon();
+      updateHomePreview();
+      drawStickerOnto(document.getElementById("mainStickerCanvas"), state.equippedSkin);
+
+      // Sync sound button state
+      document.getElementById("homeSoundBtn").textContent = state.soundEnabled ? "🔊 SFX: ON" : "🔇 SFX: OFF";
+      document.getElementById("gameSoundBtn").textContent = state.soundEnabled ? "🔊" : "🔇";
+
+      scheduleGoldenYagel();
+      lastFrameTime = performance.now();
+      requestAnimationFrame(mainLoop);
+    };
+  </script>
+</body>
+</html>
